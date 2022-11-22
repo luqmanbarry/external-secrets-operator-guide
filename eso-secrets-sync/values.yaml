@@ -67,10 +67,10 @@ provider:
           isRemoteValueB64EncodedIn: "false"
           templateKey: "MONGODB_HOSTNAME"
           localSecretKey: "mongodb.hostname"
-        - remoteKey: "MONGODB_SCHEMA"
+        - remoteKey: "MONGODB_DOCUMENT"
           isRemoteValueB64EncodedIn: "false"
-          templateKey: "MONGODB_SCHEMA"
-          localSecretKey: "mongodb.schema"
+          templateKey: "MONGODB_DOCUMENT"
+          localSecretKey: "mongodb.document"
         # Upcoming are multiline strings; they need to be Base64 Encoded to keep them intact
         - remoteKey: "rsa_ssh.public"
           isRemoteValueB64Encoded: "true"
