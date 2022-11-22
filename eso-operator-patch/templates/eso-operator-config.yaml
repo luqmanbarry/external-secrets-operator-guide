@@ -1,0 +1,32 @@
+apiVersion: operator.external-secrets.io/v1alpha1
+kind: OperatorConfig
+metadata:
+  name: external-secrets-operator
+  namespace: {{ include "eso-operator-patch.namespace" . }}
+  labels:
+    {{- include "eso-operator-patch.labels" . | nindent 4}}
+spec:
+  webhook:
+    create: true
+  crds:
+    createClusterExternalSecret: false
+    createClusterSecretStore: false
+  certController:
+    create: false
+  # this must be set to false when using the OLM
+  installCRDs: false
+  image:
+    repository: {{ .Values.operator.operatorConfig.image.repository }}
+    pullPolicy: {{ .Values.operator.operatorConfig.image.pullPolicy }}
+    tag: {{ .Values.operator.operatorConfig.image.tag | default "" }}
+  prometheus:
+    enabled: true
+    service:
+      port: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi 

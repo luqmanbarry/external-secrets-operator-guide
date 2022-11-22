@@ -1,0 +1,4 @@
+The following resources will be deployed:
+  OperatorGroup
+  Subscription
+  OperatorConfig

@@ -1,0 +1,20 @@
+
+
+operator:
+  imagePatchCronJob:
+    # The service account and associated roles must be created first.
+    serviceAccountName: eso-images-patch-sa
+    # CronJob will run every 5min
+    patchSchedule: '5 * * * *'
+    deploymentName: "external-secrets-operator-controller-manager"
+    image: 
+      repository: image-registry.openshift-image-registry.svc:5000/openshift/external-secrets-helm-operator
+      pullPolicy: IfNotPresent
+      tag: 'v0.6.1'
+  
+  operatorConfig:
+    deploymentName: "external-secrets-operator"
+    image: 
+      repository: image-registry.openshift-image-registry.svc:5000/openshift/external-secrets
+      pullPolicy: IfNotPresent
+      tag: 'v0.6.1'

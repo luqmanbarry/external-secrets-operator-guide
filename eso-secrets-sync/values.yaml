@@ -1,0 +1,83 @@
+
+enabled: true
+
+provider:
+  aws:
+    region: us-east-2
+    accessKey: VRTJQVJOQTVFQkQ3WEZMM1RTNDY=
+    secretAccessKey: 1232xOGdsblJ3UWtkSElZeGhFYUQ5d2xnNDhnVktRNWM1dmRDRXFQWQ==
+    externalSecret:
+      apps:
+      - name: product-service
+        enabled: true
+        project: eso-demo
+        # Default value is 1h
+        refreshInterval: 5m
+        # Possible Values: "Opaque", "kubernetes.io/dockerconfigjson", "kubernetes.io/tls", "kubernetes.io/ssh-auth"
+        secretType: Opaque
+        localSecretName: product-service-secret
+        remoteSecretBucket: "non-prod/eso-demo/product-service/secrets"
+        keySets:
+        # templateKey: Replace dots(.) by underscores; use snake case(substr1_substr2_substr3)
+        - remoteKey: "MYSQL_USERNAME"
+          isRemoteValueB64Encoded: "false"
+          templateKey: "MYSQL_USERNAME"
+          localSecretKey: "mysql.username"
+        - remoteKey: "MYSQL_PASSWORD"
+          isRemoteValueB64Encoded: "false"
+          templateKey: "MYSQL_PASSWORD"
+          localSecretKey: "mysql.password"
+        - remoteKey: "MYSQL_HOSTNAME"
+          isRemoteValueB64Encoded: "false"
+          templateKey: "MYSQL_HOSTNAME"
+          localSecretKey: "mysql.hostname"
+        - remoteKey: "MYSQL_SCHEMA"
+          isRemoteValueB64Encoded: "false"
+          templateKey: "MYSQL_SCHEMA"
+          localSecretKey: "mysql.schema"
+        # Upcoming are multiline strings; they need to be Base64 Encoded to keep them intact
+        - remoteKey: "rsa_ssh.public"
+          isRemoteValueB64Encoded: "true"
+          templateKey: "RSA_SSH_PUBLIC"
+          localSecretKey: "rsa_ssh.public"
+        - remoteKey: "rsa_ssh.private"
+          isRemoteValueB64Encoded: "true"
+          templateKey: "RSA_SSH_PRIVATE"
+          localSecretKey: "rsa_ssh.private"
+      - name: shipping-service
+        enabled: true
+        project: eso-demo
+        # Default value is 1h
+        refreshInterval: 10m
+        # Possible Values: "Opaque", "kubernetes.io/dockerconfigjson", "kubernetes.io/tls", "kubernetes.io/ssh-auth"
+        secretType: Opaque
+        localSecretName: shipping-service-secret
+        remoteSecretBucket: "non-prod/eso-demo/shipping-service/secrets"
+        keySets:
+        # templateKey: Replace dots(.) by underscores; use snake case(substr1_substr2_substr3)
+        - remoteKey: "MONGODB_USERNAME"
+          isRemoteValueB64EncodedIn: "false"
+          templateKey: "MONGODBL_USERNAME"
+          localSecretKey: "mongodb.username"
+        - remoteKey: "MONGODB_PASSWORD"
+          isRemoteValueB64EncodedIn: "false"
+          templateKey: "MONGODB_PASSWORD"
+          localSecretKey: "mongodb.password"
+        - remoteKey: "MONGODB_HOSTNAME"
+          isRemoteValueB64EncodedIn: "false"
+          templateKey: "MONGODB_HOSTNAME"
+          localSecretKey: "mongodb.hostname"
+        - remoteKey: "MONGODB_SCHEMA"
+          isRemoteValueB64EncodedIn: "false"
+          templateKey: "MONGODB_SCHEMA"
+          localSecretKey: "mongodb.schema"
+        # Upcoming are multiline strings; they need to be Base64 Encoded to keep them intact
+        - remoteKey: "rsa_ssh.public"
+          isRemoteValueB64Encoded: "true"
+          templateKey: "RSA_SSH_PUBLIC"
+          localSecretKey: "rsa_ssh.public"
+        - remoteKey: "rsa_ssh.private"
+          isRemoteValueB64Encoded: "true"
+          templateKey: "RSA_SSH_PRIVATE"
+          localSecretKey: "rsa_ssh.private"
+       

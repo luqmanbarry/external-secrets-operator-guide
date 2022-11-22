@@ -1,0 +1,10 @@
+{{- if not .Values.operator.globalOperatorGroupExists }}
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: eso-{{ include "eso-operator-install.namespace" . }}
+  namespace: {{ include "eso-operator-install.namespace" . }}
+  labels:
+    {{- include "eso-operator-install.labels" . | nindent 4 }}
+spec: {}
+{{- end }}

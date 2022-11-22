@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "eso-operator-patch.name" . }}
+  namespace: {{ include "eso-operator-patch.namespace" . }}
+  labels:
+    {{- include "eso-operator-patch.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.operator.imagePatchCronJob.patchSchedule }}"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "eso-operator-patch.labels" . | nindent 12 }}
+        spec:
+          serviceAccountName: "{{ .Values.operator.imagePatchCronJob.serviceAccountName }}"
+          serviceAccount: "{{ .Values.operator.imagePatchCronJob.serviceAccountName }}"
+          restartPolicy: Never
+          containers:
+          - name: {{ include "eso-operator-patch.name" . }}
+            image: registry.redhat.io/openshift4/ose-cli:v4.10
+            command:
+            - /bin/sh
+            - -c
+            - |
+                set -e
+                SOURCE_IMAGE=$(oc get deploy/{{ .Values.operator.imagePatchCronJob.deploymentName }} \
+                  -o jsonpath='{.spec.template.spec.containers[0].image}')
+                TARGET_IMAGE="{{ .Values.operator.imagePatchCronJob.image.repository }}:{{ .Values.operator.imagePatchCronJob.image.tag }}"
+
+                echo "Live Image: ${SOURCE_IMAGE}"
+                echo "Target Image: ${TARGET_IMAGE}"
+                if [[ "${SOURCE_IMAGE}" == "${TARGET_IMAGE}" ]];
+                then
+                  echo "Controller Manager Deployment have correct Image. No Image updates needed..."
+                else
+                  echo "===> Patching Image url..."
+                  oc patch deployment/{{ .Values.operator.imagePatchCronJob.deploymentName }} \
+                    --type='json' \
+                    -p="[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/image\", \"value\":\"${TARGET_IMAGE}\"}]" \
+                    -v=2
+                  
+                  echo "===> Rolling out deployment..."
+                  oc rollout restart deployment/{{ .Values.operator.imagePatchCronJob.deploymentName }}
+                fi
+                set +e
+---
