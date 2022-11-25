@@ -25,9 +25,9 @@ spec:
             - -c
             - |
                 set -e
-                SOURCE_IMAGE=$(oc get deploy/{{ .Values.operator.imagePatchCronJob.deploymentName }} \
+                SOURCE_IMAGE=$(oc get deploy/{{ .Values.operator.controllerManager.deploymentName }} \
                   -o jsonpath='{.spec.template.spec.containers[0].image}')
-                TARGET_IMAGE="{{ .Values.operator.imagePatchCronJob.image.repository }}:{{ .Values.operator.imagePatchCronJob.image.tag }}"
+                TARGET_IMAGE="{{ .Values.operator.controllerManager.image.repository }}:{{ .Values.operator.controllerManager.image.tag }}"
 
                 echo "Live Image: ${SOURCE_IMAGE}"
                 echo "Target Image: ${TARGET_IMAGE}"
@@ -36,13 +36,13 @@ spec:
                   echo "Controller Manager Deployment have correct Image. No Image updates needed..."
                 else
                   echo "===> Patching Image url..."
-                  oc patch deployment/{{ .Values.operator.imagePatchCronJob.deploymentName }} \
+                  oc patch deployment/{{ .Values.operator.controllerManager.deploymentName }} \
                     --type='json' \
                     -p="[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/image\", \"value\":\"${TARGET_IMAGE}\"}]" \
                     -v=2
                   
                   echo "===> Rolling out deployment..."
-                  oc rollout restart deployment/{{ .Values.operator.imagePatchCronJob.deploymentName }}
+                  oc rollout restart deployment/{{ .Values.operator.controllerManager.deploymentName }}
                 fi
                 set +e
 ---

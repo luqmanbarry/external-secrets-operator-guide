@@ -6,15 +6,23 @@ operator:
     serviceAccountName: eso-images-patch-sa
     # CronJob will run every 5min
     patchSchedule: '5 * * * *'
-    deploymentName: "external-secrets-operator-controller-manager"
-    image: 
-      repository: image-registry.openshift-image-registry.svc:5000/openshift/external-secrets-helm-operator
-      pullPolicy: IfNotPresent
-      tag: 'v0.6.1'
   
   operatorConfig:
     deploymentName: "external-secrets-operator"
     image: 
-      repository: image-registry.openshift-image-registry.svc:5000/openshift/external-secrets
+      # Public Container Image 
+      #repository: ghcr.io/external-secrets/external-secrets
+      # Private Container Image -- Make sure you replace 'eso-build' by your namespace
+      repository: "image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets"
+      pullPolicy: IfNotPresent
+      tag: 'v0.6.1'
+
+  controllerManager:
+    deploymentName: "external-secrets-operator-controller-manager"
+    image:
+      # Public Container Image 
+      #repository: ghcr.io/external-secrets/external-secrets-helm-operator
+      # Private Container Image -- Make sure you replace 'eso-build' by your namespace
+      repository: "image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets-helm-operator"
       pullPolicy: IfNotPresent
       tag: 'v0.6.1'

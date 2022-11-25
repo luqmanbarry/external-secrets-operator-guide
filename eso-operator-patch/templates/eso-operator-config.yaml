@@ -6,27 +6,58 @@ metadata:
   labels:
     {{- include "eso-operator-patch.labels" . | nindent 4}}
 spec:
-  webhook:
-    create: true
-  crds:
-    createClusterExternalSecret: false
-    createClusterSecretStore: false
   certController:
-    create: false
-  # this must be set to false when using the OLM
-  installCRDs: false
+    create: true
+    image:
+      pullPolicy: {{ .Values.operator.operatorConfig.image.pullPolicy }}
+      repository: {{ .Values.operator.operatorConfig.image.repository }}
+      tag: {{ .Values.operator.operatorConfig.image.tag }}
+    rbac:
+      create: true
+    requeueInterval: 5m
+    serviceAccount:
+      create: true
+      name: ''
+      podLabels:
+        {{- include "eso-operator-patch.labels" . | nindent 8 }}
+  concurrent: 1
+  crds:
+    # createClusterExternalSecret: true
+    # createClusterSecretStore: true
+  createOperator: true
   image:
-    repository: {{ .Values.operator.operatorConfig.image.repository }}
     pullPolicy: {{ .Values.operator.operatorConfig.image.pullPolicy }}
-    tag: {{ .Values.operator.operatorConfig.image.tag | default "" }}
-  prometheus:
-    enabled: true
-    service:
-      port: 8080
+    repository: {{ .Values.operator.operatorConfig.image.repository }}
+    tag: {{ .Values.operator.operatorConfig.image.tag }}
+  installCRDs: false
+  leaderElect: false
+  # processClusterExternalSecret: true
+  # processClusterStore: true
+  rbac:
+    create: true
+  replicaCount: 1
   resources:
     requests:
       cpu: 100m
       memory: 256Mi
     limits:
       cpu: 200m
-      memory: 512Mi 
+      memory: 512Mi
+  scopedRBAC: false
+  serviceAccount:
+    create: true
+    name: ''
+  webhook:
+    certCheckInterval: 5m
+    certDir: /tmp/certs
+    create: true
+    image:
+      pullPolicy: {{ .Values.operator.operatorConfig.image.pullPolicy }}
+      repository: {{ .Values.operator.operatorConfig.image.repository }}
+      tag: {{ .Values.operator.operatorConfig.image.tag }}
+    rbac:
+      create: true
+    replicaCount: 1
+    serviceAccount:
+      create: true
+      name: ''

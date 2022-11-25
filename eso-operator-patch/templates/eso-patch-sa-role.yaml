@@ -1,0 +1,41 @@
+# Make sure you update namespace: field for each new namespace
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eso-images-patch-sa
+  namespace: {{ include "eso-operator-patch.namespace" . }}
+  labels:
+    {{- include "eso-operator-patch.labels" . | nindent 4 }}
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: eso-images-patch-sa
+  namespace: {{ include "eso-operator-patch.namespace" . }}
+  labels:
+    {{- include "eso-operator-patch.labels" . | nindent 4 }}
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "update", "patch"]
+  resourceNames:
+  - external-secrets-operator-controller-manager
+  - external-secrets-operator
+  - external-secrets-operator-cert-controller
+  - external-secrets-operator-webhook
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: eso-images-patch-sa
+  namespace: {{ include "eso-operator-patch.namespace" . }}
+  labels:
+    {{- include "eso-operator-patch.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: eso-images-patch-sa
+subjects:
+- kind: ServiceAccount
+  name: eso-images-patch-sa
+  namespace: {{ include "eso-operator-patch.namespace" . }}

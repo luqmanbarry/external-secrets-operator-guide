@@ -1,12 +1,15 @@
 
 enabled: true
 
+
 provider:
   aws:
-    region: us-east-2
-    accessKey: VRTJQVJOQTVFQkQ3WEZMM1RTNDY=
-    secretAccessKey: 1232xOGdsblJ3UWtkSElZeGhFYUQ5d2xnNDhnVktRNWM1dmRDRXFQWQ==
-    externalSecret:
+    # The region of the Secrets Manager bucket
+    region: us-east-1
+    accessKey: "AKIA3WQVGPJHS4IJQG64"
+    secretAccessKey: "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"
+    authSecretName: eso-aws-authn-secret 
+    externalSecrets:
       apps:
       - name: product-service
         enabled: true
@@ -19,30 +22,30 @@ provider:
         remoteSecretBucket: "non-prod/eso-demo/product-service/secrets"
         keySets:
         # templateKey: Replace dots(.) by underscores; use snake case(substr1_substr2_substr3)
-        - remoteKey: "MYSQL_USERNAME"
-          isRemoteValueB64Encoded: "false"
-          templateKey: "MYSQL_USERNAME"
+        - remoteKey: "mysql.username"
+          isRemoteValueB64Encoded: false
+          templateKey: "mysql_username"
           localSecretKey: "mysql.username"
-        - remoteKey: "MYSQL_PASSWORD"
-          isRemoteValueB64Encoded: "false"
-          templateKey: "MYSQL_PASSWORD"
+        - remoteKey: "mysql.password"
+          isRemoteValueB64Encoded: false
+          templateKey: "mysql_password"
           localSecretKey: "mysql.password"
-        - remoteKey: "MYSQL_HOSTNAME"
-          isRemoteValueB64Encoded: "false"
-          templateKey: "MYSQL_HOSTNAME"
+        - remoteKey: "mysql.hostname"
+          isRemoteValueB64Encoded: false
+          templateKey: "mysql_hostname"
           localSecretKey: "mysql.hostname"
-        - remoteKey: "MYSQL_SCHEMA"
-          isRemoteValueB64Encoded: "false"
-          templateKey: "MYSQL_SCHEMA"
+        - remoteKey: "mysql.schema"
+          isRemoteValueB64Encoded: false
+          templateKey: "mysql_schema"
           localSecretKey: "mysql.schema"
         # Upcoming are multiline strings; they need to be Base64 Encoded to keep them intact
         - remoteKey: "rsa_ssh.public"
-          isRemoteValueB64Encoded: "true"
-          templateKey: "RSA_SSH_PUBLIC"
+          isRemoteValueB64Encoded: true
+          templateKey: "rsa_ssh_public"
           localSecretKey: "rsa_ssh.public"
         - remoteKey: "rsa_ssh.private"
-          isRemoteValueB64Encoded: "true"
-          templateKey: "RSA_SSH_PRIVATE"
+          isRemoteValueB64Encoded: true
+          templateKey: "rsa_ssh_private"
           localSecretKey: "rsa_ssh.private"
       - name: shipping-service
         enabled: true
@@ -55,29 +58,29 @@ provider:
         remoteSecretBucket: "non-prod/eso-demo/shipping-service/secrets"
         keySets:
         # templateKey: Replace dots(.) by underscores; use snake case(substr1_substr2_substr3)
-        - remoteKey: "MONGODB_USERNAME"
-          isRemoteValueB64EncodedIn: "false"
-          templateKey: "MONGODBL_USERNAME"
+        - remoteKey: "mongodb.username"
+          isRemoteValueB64EncodedIn: false
+          templateKey: "mongodb_username"
           localSecretKey: "mongodb.username"
-        - remoteKey: "MONGODB_PASSWORD"
-          isRemoteValueB64EncodedIn: "false"
-          templateKey: "MONGODB_PASSWORD"
+        - remoteKey: "mongodb.password"
+          isRemoteValueB64EncodedIn: false
+          templateKey: "mongodb_password"
           localSecretKey: "mongodb.password"
-        - remoteKey: "MONGODB_HOSTNAME"
-          isRemoteValueB64EncodedIn: "false"
-          templateKey: "MONGODB_HOSTNAME"
+        - remoteKey: "mongodb.hostname"
+          isRemoteValueB64EncodedIn: false
+          templateKey: "mongodb_hostname"
           localSecretKey: "mongodb.hostname"
-        - remoteKey: "MONGODB_DOCUMENT"
-          isRemoteValueB64EncodedIn: "false"
-          templateKey: "MONGODB_DOCUMENT"
+        - remoteKey: "mongodb.document"
+          isRemoteValueB64EncodedIn: false
+          templateKey: "mongodb_document"
           localSecretKey: "mongodb.document"
         # Upcoming are multiline strings; they need to be Base64 Encoded to keep them intact
         - remoteKey: "rsa_ssh.public"
-          isRemoteValueB64Encoded: "true"
-          templateKey: "RSA_SSH_PUBLIC"
+          isRemoteValueB64Encoded: true
+          templateKey: "rsa_ssh_public"
           localSecretKey: "rsa_ssh.public"
         - remoteKey: "rsa_ssh.private"
-          isRemoteValueB64Encoded: "true"
-          templateKey: "RSA_SSH_PRIVATE"
+          isRemoteValueB64Encoded: true
+          templateKey: "rsa_ssh_private"
           localSecretKey: "rsa_ssh.private"
        
