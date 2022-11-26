@@ -7,8 +7,8 @@ metadata:
     {{- include "eso-operator-patch.labels" . | nindent 4 }}
 spec:
   schedule: "{{ .Values.operator.imagePatchCronJob.patchSchedule }}"
-  failedJobsHistoryLimit: 15
-  successfulJobsHistoryLimit: 30
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
   concurrencyPolicy: 'Replace'
   jobTemplate:
     spec:
