@@ -45,6 +45,8 @@ spec:
                     -p="[{\"op\": \"replace\", \"path\": \"/spec/install/spec/deployments/0/spec/template/spec/containers/0/image\", \"value\":\"${TARGET_IMAGE}\"}]" \
                     --record=true \
                     -v=4
+
+                  sleep 60
                   
                   echo "===> Rolling out deployment..."
                   oc rollout restart deployment/{{ .Values.operator.controllerManager.deploymentName }}
