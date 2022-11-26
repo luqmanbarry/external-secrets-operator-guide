@@ -7,6 +7,9 @@ metadata:
     {{- include "eso-operator-patch.labels" . | nindent 4 }}
 spec:
   schedule: "{{ .Values.operator.imagePatchCronJob.patchSchedule }}"
+  failedJobsHistoryLimit: 15
+  successfulJobsHistoryLimit: 30
+  concurrencyPolicy: 'Replace'
   jobTemplate:
     spec:
       template:
@@ -36,10 +39,12 @@ spec:
                   echo "Controller Manager Deployment have correct Image. No Image updates needed..."
                 else
                   echo "===> Patching Image url..."
-                  oc patch deployment/{{ .Values.operator.controllerManager.deploymentName }} \
+
+                  oc patch csv/{{ .Values.operator.controllerManager.startingCSV }} \
                     --type='json' \
-                    -p="[{\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/image\", \"value\":\"${TARGET_IMAGE}\"}]" \
-                    -v=2
+                    -p="[{\"op\": \"replace\", \"path\": \"/spec/install/spec/deployments/0/spec/template/spec/containers/0/image\", \"value\":\"${TARGET_IMAGE}\"}]" \
+                    --record=true \
+                    -v=4
                   
                   echo "===> Rolling out deployment..."
                   oc rollout restart deployment/{{ .Values.operator.controllerManager.deploymentName }}

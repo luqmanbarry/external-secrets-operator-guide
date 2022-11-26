@@ -23,6 +23,10 @@ rules:
   - external-secrets-operator
   - external-secrets-operator-cert-controller
   - external-secrets-operator-webhook
+- apiGroups: ["operators.coreos.com"]
+  resources: ["clusterserviceversions"]
+  verbs: ["get", "list", "update", "patch"]
+  resourceNames: ["{{ .Values.operator.controllerManager.startingCSV }}"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

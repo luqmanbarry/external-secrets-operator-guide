@@ -4,13 +4,13 @@
 # Overview
 
 
-> The External Secrets Operator extends Kubernetes with Custom Resources, which define where secrets live and how to synchronize them. The controller fetches secrets from an external API and creates Kubernetes secrets. If the secret from the external API changes, the controller will reconcile the state in the cluster and update the secrets accordingly. -- ESO Docs.
+> The [External Secrets Operator](https://external-secrets.io/v0.6.1/) extends Kubernetes with Custom Resources, which define where secrets live and how to synchronize them. The controller fetches secrets from an external API and creates Kubernetes secrets. If the secret from the external API changes, the controller will reconcile the state in the cluster and update the secrets accordingly. -- ESO Docs.
 
 # Design Considerations
 
 External Secrets Operator provides different modes of operation, depending on use cases.
 
-In a multi-tenant setting, the ESO Operator can be deployed cluster wide in the `openshift-operators` namespace. This makes the Operator life cycle management easier in that only one instance and version of it is depoyed on the cluster. Hence, the tenants focus on providing their workload secrets specifications via the 3 (`ExtrnalSecret, SecretStore, Secret`) Custom Resources  to have their secrets synchronized.
+In a multi-tenant setting, the ESO Operator can be deployed cluster wide in the `openshift-operators` namespace. This makes the Operator life cycle management easier in that only one instance and version of it is depoyed on the cluster. Hence, the tenants focus on providing their workload secrets specifications via the 3 (`ExternalSecret, SecretStore, Secret`) Custom Resources  to have their secrets synchronized.
 
 
 ![ESO as a Service](assets/eso-as-a-service-diagram.PNG)
@@ -351,7 +351,7 @@ Product Service secrets `{key, value}` pairs generated.
 Shipping Service secrets `{key, value}` pairs generated.
 ![ExternalSecrets Owned Secret](assets/eso-secrets-ready-shipping.png)
 
-As you can see, we are able to have secrets created with their contents coming from AWS Secrets Manager. The `ExternalSecret` CR will restore secrets upon deletion or modification of fetched `{key, value}` pairs.
+As you can see, we are able to have secrets created with their contents coming from AWS Secrets Manager. The `ExternalSecret` CR restores secrets upon deletion, modification of fetched `{key, value}` pairs.
 
 # Summary
 
