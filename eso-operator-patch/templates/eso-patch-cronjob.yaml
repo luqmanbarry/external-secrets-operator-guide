@@ -46,8 +46,9 @@ spec:
                     --record=true \
                     -v=4
 
+                  echo "Waiting for child resources to be updated..."
                   sleep 60
-                  
+
                   echo "===> Rolling out deployment..."
                   oc rollout restart deployment/{{ .Values.operator.controllerManager.deploymentName }}
                 fi
