@@ -10,7 +10,7 @@
 
 External Secrets Operator provides different modes of operation, depending on use cases.
 
-In a multi-tenant setting, the ESO Operator can be deployed cluster wide in the `openshift-operators` namespace. This makes the Operator life cycle management easier in that only one instance and version of it is depoyed on the cluster. Hence, the tenants focus on providing their workload secrets specifications via the 3 (`ExternalSecret, SecretStore, Secret`) Custom Resources  to have their secrets synchronized.
+In a multi-tenant setting, the ESO Operator can be deployed cluster wide, in the `openshift-operators` namespace for example. This makes the Operator life cycle management easier in that only one instance and version of it is depoyed on the cluster. Hence, the tenants focus on providing their workload secrets specifications via the 3 (`ExternalSecret, SecretStore, Secret`) Custom Resources  to have their secrets synchronized.
 
 
 ![ESO as a Service](assets/eso-as-a-service-diagram.PNG)
