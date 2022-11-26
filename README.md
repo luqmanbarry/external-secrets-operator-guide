@@ -1,5 +1,5 @@
 [[_TOC_]]
-# External Secrets Operator: A guide on how to set it up with AWS Secrets Manager
+# External Secrets Operator: How to setup ESO as a service
 
 # Overview
 
