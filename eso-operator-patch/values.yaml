@@ -6,7 +6,7 @@ operator:
     # The service account and associated roles must be created first.
     serviceAccountName: eso-images-patch-sa
     # CronJob will run every 10min
-    patchSchedule: '10 * * * *'
+    patchSchedule: '*/10 * * * *'
   
   operatorConfig:
     deploymentName: "external-secrets-operator"
