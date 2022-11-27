@@ -1,6 +1,7 @@
 
 
 operator:
+  name: external-secrets-operator
   imagePatchCronJob:
     # The service account and associated roles must be created first.
     serviceAccountName: eso-images-patch-sa
