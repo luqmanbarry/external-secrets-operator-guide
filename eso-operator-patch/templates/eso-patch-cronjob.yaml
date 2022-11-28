@@ -40,7 +40,7 @@ spec:
                 else
                   echo "===> Patching Image url..."
 
-                  CSV_NAME=$( oc get csv -oname --sort-by='{.metadata.creationTimestamp}' | tail -n1 | grep {{ .Values.operator.name }} | awk '{print $1}' )
+                  CSV_NAME=$( oc get csv -oname --sort-by='{.metadata.creationTimestamp}' | grep {{ .Values.operator.name }} | tail -n1 | awk '{print $1}' )
                   oc patch $CSV_NAME \
                     --type='json' \
                     -p="[{\"op\": \"replace\", \"path\": \"/spec/install/spec/deployments/0/spec/template/spec/containers/0/image\", \"value\":\"${TARGET_IMAGE}\"}]" \
