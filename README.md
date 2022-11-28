@@ -155,7 +155,18 @@ The [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operato
 Clone the [guide repository](https://github.com/luqmanbarry/external-secrets-operator-guide) and use the repo folder as home directory.
 
 
-### 1. Push Operator Images to internal registry
+### 1. Create build and deployment (demo) namespaces
+
+```
+# For ImageStreams
+oc create namespace eso-build
+
+# For Application deployment
+oc new-project eso-demo
+```
+<br>
+
+### 2. Push Operator Images to internal registry
 
 Registry format: `<INTERNAL_REGISTRY_SVC>:<PORT>/<IMAGE_NAMESPACE>/<IMAGE_STREAM_NAME>:<IMAGE_STREAM_TAG>`
 
@@ -207,7 +218,7 @@ After images are pushed to internal registry in **eso-build** namespace
 We are now ready to deploy the Operator and its custom resources.
 
 
-### 2. Install the [eso-operator-install](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-install) chart
+### 3. Install the [eso-operator-install](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-install) chart
 
 The chart creates `Subscription` and `OperatorGroup` CRs. The `OperatorGroup` template is disabled by default because it is getting deployed in the `openshift-operators` namespace which has one already. Set the `operator.globalOperatorGroupExists: false` in the chart [values.yaml](https://github.com/luqmanbarry/external-secrets-operator-guide/blob/master/eso-operator-install/values.yaml) file if you want to include it in the chart deployment.
 
@@ -221,7 +232,7 @@ After successful installation, the Operator is available in `eso-demo` despite h
 ![ESO Installed](assets/eso-installed.png)
 
 
-### 3. Install the [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch) chart
+### 4. Install the [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch) chart
 
 Before we proceeding with chart installation, let's grant service accounts in the `openshift-operators` namespace permission to pull images from `eso-build` namespace.
 
