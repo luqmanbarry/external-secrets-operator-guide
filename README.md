@@ -63,7 +63,7 @@ Shipping Service Empty Bucket
 
 ### 2. Place secrets data into the buckets following the `{"key": "value"}` pair format.
 
-| IMPORTANT: For multiline strings such as certificates, properties and config files, ensure secrets values are `Base64` encoded to keep formatting. This is to avoid whitespace characters being added during storage. |
+| IMPORTANT: For multiline strings such as certificates, properties and config files, ensure secrets values are `Base64` encoded to keep formatting. AWS Secrets Manager does not enforce space and newline based formatting. |
 | --- |
 
 For example to encode/decode a plaintext file, execute this command:
