@@ -23,10 +23,10 @@ Three (3) helm charts are utilized to deploy this solution. Note I try to simula
 
 Following charts will be deployed in this order:
 
-- **eso-operator-install**: Deploys the ESO operator and its CRDs (OperatorGroup, Subscription) in the `openshift-operators` namespace.
+- [eso-operator-install](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-install): Deploys the ESO operator and its CRDs (OperatorGroup, Subscription) in the `openshift-operators` namespace.
 
-- **eso-operator-patch**: Deploys the resources needed to apply patches to the operator. This chart deploys an `OperatorConfig` resource which references a private container image; while the `CronJob` periodically patches the operator controller manager deployment to reference another private container image.
-- **eso-secrets-sync**: Deploys the CRs (`ExternalSecret, SecretStore`) needed to integrate with AWS as well as creating kubernetes secrets backed by one or more `AWS Secret Manager` buckets.
+- [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch): Deploys the resources needed to apply patches to the operator. This chart deploys an `OperatorConfig` resource which references a private container image; while the `CronJob` periodically patches the operator controller manager deployment to reference another private container image.
+- [eso-secrets-sync](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-secrets-sync): Deploys the CRs (`ExternalSecret, SecretStore`) needed to integrate with AWS as well as creating kubernetes secrets backed by one or more `AWS Secret Manager` buckets.
 
     - `Secret`: Kubernetes object for storing the AWS IAM User credentials
     - `SecretStore`: ESO custom resource that references the `Secret`.
