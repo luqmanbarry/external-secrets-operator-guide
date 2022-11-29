@@ -36,6 +36,8 @@ Following charts will be deployed in this order:
 
 Screen captures and code snippets show sensitive data. This is done intentionally to facilitate understanding. The clusters will be destroyed by the time this content goes live.
 
+Helm charts were tested on OpenShift v4.10.x.
+
 # Prerequisites
 
 - Up and running OCP 4.7+ cluster
@@ -44,7 +46,7 @@ Screen captures and code snippets show sensitive data. This is done intentionall
 - IAM user with rights to at least read secret manager buckets
 - AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY details
 - Service Account with edit access to deployment namespaces
-- `podman` or `docker` or `skopeo`, `oc` or `kubectl` installed on your workstation
+- `podman` or `docker` or `skopeo`, `oc` or `kubectl`, `helm` installed on your workstation
 
 # Procedure
 
