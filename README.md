@@ -1,57 +1,79 @@
-[[_TOC_]]
-# External Secrets Operator: How to setup ESO as a service
+
+# How to Setup External Secrets Operator (ESO) as a service
 
 # Overview
 
+> "The [External Secrets Operator](https://external-secrets.io/) (ESO) extends Kubernetes with `Custom Resources`, which define where secrets live and how to synchronize them. The controller fetches secrets from an external API and creates Kubernetes secrets. If the secret from the external API changes, the controller will reconcile the state in the cluster and update the secrets accordingly."
+>
+> &mdash;ESO Docs.
 
-> The [External Secrets Operator](https://external-secrets.io/v0.6.1/) extends Kubernetes with Custom Resources, which define where secrets live and how to synchronize them. The controller fetches secrets from an external API and creates Kubernetes secrets. If the secret from the external API changes, the controller will reconcile the state in the cluster and update the secrets accordingly. -- ESO Docs.
+# Introduction
 
-# Design Considerations
+`External Secrets Operator` provides different {==modes of operation==}{>>provide examples, or list<<}, depending on the use case.
 
-External Secrets Operator provides different modes of operation, depending on use cases.
+In a _multi-tenant_ setting, the operator can be deployed cluster-wide, for example, in the `openshift-operators` namespace. This makes the Operator Life Cycle management easier in that only _one_ instance and a single version of the ESO is deployed on the cluster. Hence, the tenants can focus on providing their workload secrets specifications using the `ExternalSecret` and `SecretStore` Custom Resources (CRs) to have their secrets pulled from the secrets provider (such as the [AWS Secrets Manager][aws-secrets-manager]).
 
-In a multi-tenant setting, the ESO Operator can be deployed cluster wide, in the `openshift-operators` namespace for example. This makes the Operator life cycle management easier in that only one instance and version of it is deployed on the cluster. Hence, the tenants focus on providing their workload secrets specifications using the `ExternalSecret, SecretStore` Custom Resources (CRs)  to have their secrets pulled from AWS.
 
+{>>Describe what this diagram is depicting<<}
 
 ![ESO as a Service](assets/eso-as-a-service-diagram.PNG)
 
+[aws-secrets-manager]: https://aws.amazon.com/secrets-manager/
 
-## Deployment
+## The Problem
 
-Three (3) helm charts are utilized to deploy this solution. Note I try to simulate a corporate environment whereby digital security mandates all container Images be pulled from a private/internal registry.
+{>>Provide a high level description of the problem you are solving here<<}
 
+## The Solution
 
-Following charts will be deployed in this order:
+{>>Describe the solution approach. What does this solution do to solve the problem described above<<}
 
-- [eso-operator-install](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-install): Deploys the ESO operator and its CRDs (OperatorGroup, Subscription) in the `openshift-operators` namespace.
+Three (3) helm charts are utilized to deploy this solution. Note that this is simulating an enterprise deployment environment where Corporate InfoSec policies require all container images be hosted and served from a private, _internal_ registry.
 
-- [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch): Deploys the resources needed to apply patches to the operator. This chart deploys an `OperatorConfig` resource which references a private container image; while the `CronJob` periodically patches the operator controller manager deployment to reference another private container image.
-- [eso-secrets-sync](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-secrets-sync): Deploys the CRs (`ExternalSecret, SecretStore`) needed to integrate with AWS as well as creating kubernetes secrets backed by one or more `AWS Secret Manager` buckets.
+{>>Provide a description of what is the setup, and the constraint/problem that this specific deployment solution solves. E.g., the image reference patching requirement.<<}
+
+In this example, the `AWS Secrets Manager` is used as the secrets provider. However, the solution can be used with any of the providers[^1] supported by ESO.
+
+The following charts are deployed in this order:
+
+- [eso-operator-install][]: Deploys the ESO operator and its CRDs (`OperatorGroup`, `Subscription`) in the `openshift-operators` namespace.
+
+- [eso-operator-patch][]: Deploys the resources needed to apply patches to the operator. This chart deploys an `OperatorConfig` resource which references a private container image; while the `CronJob` periodically `patches` the operator controller manager deployment to reference another private container image.
+
+- [eso-secrets-sync][]: Deploys the CRs (`ExternalSecret`, `SecretStore`) needed to integrate with the secrets provider, as well as creating the Kubernetes `secrets` backed by one or more `AWS Secret Manager` buckets (for this example).
 
     - `Secret`: Kubernetes object for storing the AWS IAM User credentials
     - `SecretStore`: ESO custom resource that references the `Secret`.
-    - `ExternalSecret`: ESO custom resource for defining the relationship between AWS Secret Manager buckets `{key, value}` pairs and the "to be" created kubernetes secrets.
+    - `ExternalSecret`: ESO custom resource for defining the relationship between AWS Secret Manager bucket's `{key, value}` pairs and the "to be" created Kubernetes secrets.
 
-# Implementation
-
-Screen captures and code snippets show sensitive data. This is done intentionally to facilitate understanding. The clusters will be destroyed by the time this content goes live.
-
-Helm charts were tested on OpenShift v4.10.x.
+[eso-operator-install]: https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-install
+[eso-operator-patch]: https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch
+[eso-secrets-sync]: https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-secrets-sync
 
 # Prerequisites
 
-- Up and running OCP 4.7+ cluster
+- A running Red Hat `OpenShift` 4.7+ cluster
 - Access to an AWS account
-- Secret Manager bucket created, required groups and policies applied
-- IAM user with rights to at least read secret manager buckets
-- AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY details
-- Service Account with edit access to deployment namespaces
-- `podman` or `docker` or `skopeo`, `oc` or `kubectl`, `helm` installed on your workstation
+- `AWS Secrets Manager` bucket created, and required groups and policies applied
+- An `IAM` user with rights to at least read secret manager buckets
+- `AWS_ACCESS_KEY` and `AWS_SECRET_ACCESS_KEY` values
+- An OpenShift `service account`  (SA) with edit access to deployment namespaces
+- The following CLI tools
+    - `podman` or `docker` or `skopeo`
+    - `oc` or `kubectl`
+    - `helm`
+
+# Implementation
+
+These Helm charts have been tested on Red Hat `OpenShift` v4.10.x.
+
+The following example uses two example services (`Product Service` and the `Shipping Service`), which will use the ESO to access credentials from AWS Secrets Manager.
+
+Note that the following screenshots and code snippets intentionally show **sample** sensitive data as _examples_.
 
 # Procedure
 
 ## I. AWS Secrets Manager Setup
-
 
 ### 1. Create the **AWS Secrets Manager** buckets
 
@@ -63,28 +85,28 @@ Shipping Service Empty Bucket
 ![Shipping Service Empty Bucket](assets/shipping-service-bucket-empty.png)
 
 
+{>>Insert a link to the AWS documentation for creating the buckets<<}
+
 ### 2. Place secrets data into the buckets following the `{"key": "value"}` pair format.
 
-| IMPORTANT: For multiline strings such as certificates, properties and config files, ensure secrets values are `Base64` encoded to keep formatting. AWS Secrets Manager does not enforce space and newline based formatting. |
-| --- |
+> **IMPORTANT**: For multi-line strings such as certificates, properties and config files, ensure secrets values are `Base64` encoded to retain formatting. AWS Secrets Manager does not support space and newline based formatting.
 
 For example to encode/decode a plaintext file, execute this command:
 
 ```
 # Encode to base64
-cat cleartextFile.txt | base64 > encodedFile.txt
+base64 < cleartextFile.txt > encodedFile.txt
 
 # Decode from base64
-cat encodedFile.txt | base64 -d > cleartextFile.txt
+base64 -d < encodedFile.txt  > cleartextFile.txt
 ```
 
-
-**Before secrets are stored**
+**Before the secrets are stored**
 
 ![Product Service Bucket](assets/product-service-bucket.png)
 
 
-**After secrets are stored**
+**After the secrets are stored**
 
 Product Service Stored Secrets
 ![Product Service Bucket Stored](assets/product-service-bucket-stored.png)
@@ -93,110 +115,110 @@ Shipping Service Stored Secrets
 ![Shipping Service Bucket Stored](assets/shipping-service-bucket-stored.png)
 
 
-### 3. Create IAM Policy
+### 3. Create the AWS IAM Policy
 
-We will create the `eso-demo-iam` IAM User and grant it Read access to the `non-prod/eso-demo/product-service/secrets` and `non-prod/eso-demo/shipping-service/secrets` **AWS Secrets Manager** buckets.
+We will create a new `eso-demo-iam` IAM User and grant it `read` access to the `non-prod/eso-demo/product-service/secrets` and `non-prod/eso-demo/shipping-service/secrets` **AWS Secrets Manager** buckets.
 
-IAM Policy with **Read** permission to the two (2) buckets. 
+IAM Policy with **Read** permission to the two (2) buckets:
 
-```
+```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": [
-                "secretsmanager:GetResourcePolicy",
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-                "secretsmanager:ListSecretVersionIds"
-            ],
-            "Resource": [
-                "arn:aws:secretsmanager:us-east-1:804277090895:secret:non-prod/eso-demo/product-service/secrets-1R6JAf",
-                "arn:aws:secretsmanager:us-east-1:804277090895:secret:non-prod/eso-demo/shipping-service/secrets-apkTYz"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": "secretsmanager:ListSecrets",
-            "Resource": "*"
-        }
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+    "Sid": "VisualEditor0",
+    "Effect": "Allow",
+    "Action": [
+      "secretsmanager:GetResourcePolicy",
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:ListSecretVersionIds"
+    ],
+    "Resource": [
+      "arn:aws:secretsmanager:us-east-1:804277090895:secret:non-prod/eso-demo/product-service/secrets-1R6JAf",
+      "arn:aws:secretsmanager:us-east-1:804277090895:secret:non-prod/eso-demo/shipping-service/secrets-apkTYz"
     ]
+  },
+    {
+    "Effect": "Allow",
+    "Action": "secretsmanager:ListSecrets",
+    "Resource": "*"
+  }
+  ]
 }
 ```
-<br>
 
-### 4. Create IAM User and assign it the Policy above
+### 4. Create the IAM User and assign it the Policy
 
-Pay close attention to the checkbox.
+Create the IAM user and select the credential type as `Access Key - Programmatic access`:
+
 ![IAM User Add Step1](assets/iam-user-add-step1.png)
 
 Pay close attention to the selected option on the right most tile
 ![IAM User Add Policy](assets/iam-user-add-policy.png)
 
-Preview of user to be created
+Preview the user to be created
 ![IAM User Add Review](assets/iam-user-add-review.png)
 
-User created, `Access key ID` and `Secret access key` printed
+The IAM user has been created, `Access key ID` and `Secret access key` are displayed:
 ![IAM User Add Creds](assets/iam-user-add-creds.png)
 
 Take note of the **Access key ID** and **Secret access key** info.
 
+--------------------------------------------------------------------------------------
 
----
+## II. Deploying the External Secrets Operator using Helm
 
-## II. External Secrets Operator Charts Deployment
+We now proceed with installing the operator and its custom resources.
 
-We will now proceed with installing the operator and custom resources.
+The setup simulates an environment where enterprise INFOSEC policy allows container images only from the corporate private registry or OpenShift's internal registry.
 
-The setup simulates an environment whereby company digital security policy stipulates that only container images coming from the corporate private registry or OpenShift internal registry are allowed.
+The [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch) chart is created to address this requirement. The chart deploys a `CronJob` resource, which periodically replaces the default Github container registry (`ghcr.io`) image referfence defined in the `ClusterServiceVersion` by a **private** image pushed via `skopeo` into the OpenShift cluster `eso-build` namespace.
 
-The [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch) chart is created to address this requirement. The chart deploys a `CronJob` resource among others which will periodically replace the default github container registry (ghcr.io) image defined in the `ClusterServiceVersion` by a private image pushed via `skopeo` into the OpenShift cluster `eso-build` namespace.
+Clone the [guide repository](https://github.com/luqmanbarry/external-secrets-operator-guide) and use the repo folder as default directory.
 
-Clone the [guide repository](https://github.com/luqmanbarry/external-secrets-operator-guide) and use the repo folder as home directory.
+### 1. Create the build and deployment (demo) namespaces
 
-
-### 1. Create build and deployment (demo) namespaces
-
-```
+```sh
 # For ImageStreams
 oc create namespace eso-build
 
 # For Application deployment
 oc new-project eso-demo
 ```
-<br>
 
 ### 2. Push Operator Images to internal registry
 
 Registry format: `<INTERNAL_REGISTRY_SVC>:<PORT>/<IMAGE_NAMESPACE>/<IMAGE_STREAM_NAME>:<IMAGE_STREAM_TAG>`
 
-- Operator Controller Manager Image: 
-  - Public Image: `ghcr.io/external-secrets/external-secrets-helm-operator:v0.6.1`
-  - Internal Image: `image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets-helm-operator:v0.6.1`
-- OperatorConfig Image:
-  - Public Image: `ghcr.io/external-secrets/external-secrets:v0.6.1`
-  - Internal Image: `image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets:v0.6.1`
+Operator Controller Manager Image:
+
+- Public Image: `ghcr.io/external-secrets/external-secrets-helm-operator:v0.6.1`
+- Internal Image: `image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets-helm-operator:v0.6.1`
+
+OperatorConfig Image:
+
+- Public Image: `ghcr.io/external-secrets/external-secrets:v0.6.1`
+- Internal Image: `image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets:v0.6.1`
 
 
-Before images were copied to internal registry **eso-build** namespace.
-
+Before images were copied to internal registry **eso-build** namespace:
 ![eso-build Empty](assets/eso-build-empty.png)
 
 Get public route of OpenShift internal registry
 
-```
+```sh
 oc get route default-route -ojsonpath='{.spec.host}' -n openshift-image-registry
 
 # OUTPUT
 default-route-openshift-image-registry.apps.cluster-lmttg.lmttg.sandbox2014.opentlc.com
 ```
 
+{>>Mask the TLD domain in the sample output above<<}
 
 Run `skopeo` commands to copy images from github container registry (ghcr.io) to internal registry.
 
-```
+```sh
 # Controller Manager Image
 skopeo copy docker://ghcr.io/external-secrets/external-secrets-helm-operator:v0.6.1 \
     docker://default-route-openshift-image-registry.apps.cluster-lmttg.lmttg.sandbox2014.opentlc.com/eso-build/external-secrets-helm-operator:v0.6.1 \
@@ -211,109 +233,114 @@ skopeo copy docker://ghcr.io/external-secrets/external-secrets:v0.6.1 \
     --dest-password $(oc whoami -t) \
     --override-os linux
 ```
-<br>
 
-After images are pushed to internal registry in **eso-build** namespace
+
+After images are pushed to internal registry in **eso-build** namespace:
 ![eso-build Images](assets/eso-build-images.png)
 
 
-We are now ready to deploy the Operator and its custom resources.
+We are now ready to deploy the operator and its custom resources.
 
+### 3. Install the [eso-operator-install][] Helm chart
 
-### 3. Install the [eso-operator-install](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-install) chart
+The chart creates the `Subscription` and `OperatorGroup` CRs.
 
-The chart creates `Subscription` and `OperatorGroup` CRs. The `OperatorGroup` template is disabled by default because it is getting deployed in the `openshift-operators` namespace which has one already. Set the `operator.globalOperatorGroupExists: false` in the chart [values.yaml](https://github.com/luqmanbarry/external-secrets-operator-guide/blob/master/eso-operator-install/values.yaml) file if you want to include it in the chart deployment.
+The `OperatorGroup` template is **disabled** by default because it is getting deployed in the `openshift-operators` namespace, which already has this CR. Set `operator.globalOperatorGroupExists: false` in the chart file ([values.yaml][values-install]) if you want to include it in the chart deployment.
 
-```
+```sh
 helm upgrade --install eso-operator-install ./eso-operator-install -n openshift-operators
 ```
-<br>
 
-After successful installation, the Operator is available in `eso-demo` despite having been deployed in a different namespace.
+After successful installation, the operator is available in `eso-demo` despite having been deployed in a different namespace.
 
 ![ESO Installed](assets/eso-installed.png)
 
+[values-install]: https://github.com/luqmanbarry/external-secrets-operator-guide/blob/master/eso-operator-install/values.yaml
 
-### 4. Install the [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch) chart
+### 4. Install the [eso-operator-patch][] Helm chart
 
-Before we proceeding with chart installation, let's grant service accounts in the `openshift-operators` namespace permission to pull images from `eso-build` namespace.
+Before we proceed with installing this chart, we need to grant the service accounts in the `openshift-operators` namespace the permission to pull images from `eso-build` namespace:
 
-```
-OPERATOR_NS=openshift-operators
-IMAGE_NS=eso-build
-
-oc policy add-role-to-group \
+```sh
+OPERATOR_NS=openshift-operators                               \
+IMAGE_NS=eso-build                                            \
+oc policy add-role-to-group                                   \
     system:image-puller system:serviceaccounts:${OPERATOR_NS} \
-    --rolebinding-name=eso-image-pullers \
+    --rolebinding-name=eso-image-pullers                      \
     --namespace=${IMAGE_NS}
 ```
-<br>
 
-Here's the [values.yaml](https://github.com/luqmanbarry/external-secrets-operator-guide/blob/master/eso-operator-patch/values.yaml) files, pay close attention to the Image repositories.
+Here's the [values.yaml][values-patch] file. Note the Image repositories values.
 
-```
+```yaml
 operator:
+  name: external-secrets-operator
   imagePatchCronJob:
     # The service account and associated roles must be created first.
     serviceAccountName: eso-images-patch-sa
     # CronJob will run every 5min
-    patchSchedule: '10 * * * *'
-  
+    patchSchedule: '*/5 * * * *'
+
   operatorConfig:
     deploymentName: "external-secrets-operator"
-    image: 
-      # Public Container Image 
+    image:
+      # The original PUBLIC image repository
       #repository: ghcr.io/external-secrets/external-secrets
-      # Private Container Image -- Make sure you replace 'eso-build' by your namespace
-      repository: image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets
+      # The new PRIVATE image repository -- Make sure you replace 'eso-build' with your namespace
+      repository: "image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets"
       pullPolicy: IfNotPresent
       tag: 'v0.6.1'
 
   controllerManager:
+    startingCSV: external-secrets-operator.v0.6.1
     deploymentName: "external-secrets-operator-controller-manager"
     image:
-      # Public Container Image 
+      # The original PUBLIC image repository
       #repository: ghcr.io/external-secrets/external-secrets-helm-operator
-      # Private Container Image -- Make sure you replace 'eso-build' by your namespace
-      repository: image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets-helm-operator
+      # The new PRIVATE image repository -- Make sure you replace 'eso-build' by your namespace
+      repository: "image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets-helm-operator"
       pullPolicy: IfNotPresent
       tag: 'v0.6.1'
 ```
-<br>
+
+[values-patch]: https://github.com/luqmanbarry/external-secrets-operator-guide/blob/master/eso-operator-patch/values.yaml
 
 Install the helm chart
 
-```
+```sh
 helm upgrade --install eso-operator-patch ./eso-operator-patch -n openshift-operators
 ```
-<br>
 
-After Installation
+After Installation:
 ![OperatorConfig Installed](assets/operator-config-installed.png)
 
-Resources created as a result
+The Customer Resources created as a result:
 ![OperatorConfig Resources](assets/operator-config-resources.png)
 
-We are now ready to deploy the CRs that will synchronize our secrets from **AWS Secrets Manager**.
+We are now ready to deploy the CRs that will synchronize the Kubernetes `secrets` from **AWS Secrets Manager**.
 
----
-
+--------------------------------------------------------------------------------------
 
 ## III. Secrets Synchronization
 
-The [eso-secrets-sync](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-secrets-sync) chart will deploy `ExternalSecret, SecretStore` that will authenticate to AWS using the `eso-demo-iam` IAM User, fetch and create kubernetes `Secrets` as specified in the [values.yaml](https://github.com/luqmanbarry/external-secrets-operator-guide/blob/master/eso-secrets-sync/values.yaml) file.
+The [eso-secrets-sync][] chart will deploy the `ExternalSecret` and `SecretStore`, which will:
 
-Each list item under `provider.aws.externalSecrets.apps` references one application or AWS Secrets Manager bucket.
+1. Authenticate to AWS using the `eso-demo-iam` IAM User, and
+2. Fetch and create kubernetes `Secrets` as specified in the [values.yaml][values-sync] file.
+
+Each list item under `provider.aws.externalSecrets.apps` references one application or an AWS Secrets Manager bucket.
+
+{>>Replace the access keys with junk/random values<<}
 
 For example:
 
-```
+```yaml
 provider:
   aws:
     region: us-east-1
     accessKey: "AKIA3WQVGPJHS4IJQG64"
     secretAccessKey: "EZUQOTIvg03PS7y2YboBl+uWmemET804qy2Qowlt"
-    authSecretName: eso-aws-authn-secret 
+    authSecretName: eso-aws-authn-secret
     externalSecrets:
       apps:
       - name: product-service
@@ -347,36 +374,40 @@ provider:
           templateKey: "mongodb_username"
           localSecretKey: "mongodb.username"
 ```
-<br>
 
-1. Install [eso-secrets-sync](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-secrets-sync) chart
+[values-sync]: https://github.com/luqmanbarry/external-secrets-operator-guide/blob/master/eso-secrets-sync/values.yaml
 
-The chart is deployed alongside apps that are going to use the generated secrets objects. In this demo that namespace is `eso-demo`.
+## 1. Install the [eso-secrets-sync][] chart
 
-Before chart deployment
+The chart is deployed alongside the application workloads that are going to use the generated `secrets` objects. In this example the namespace is `eso-demo`.
+
+Before chart deployment:
 ![ExternalSecrets Empty](assets/eso-esecret-empty.png)
 
-```
+```sh
 helm upgrade --install eso-secrets-sync ./eso-secrets-sync -n eso-demo
 ```
-<br>
 
-After chart deployment
+After chart deployment:
 ![ExternalSecrets Ready](assets/eso-esecret-ready.png)
 
-Product Service secrets `{key, value}` pairs generated.
+## 2. Validate synchronization of the secrets
+
+Product Service's secrets `{key, value}` pairs generated:
 ![ExternalSecrets Owned Secret](assets/eso-secrets-ready-product.png)
 
-Shipping Service secrets `{key, value}` pairs generated.
+Shipping Service's secrets `{key, value}` pairs generated:
 ![ExternalSecrets Owned Secret](assets/eso-secrets-ready-shipping.png)
 
-As you can see, we are able to have secrets created with their contents coming from **AWS Secrets Manager**. The `ExternalSecret` CR restores secrets upon deletion, modification of fetched `{key, value}` pairs.
+As can be seen, the `secrets` have been successfully created, with content from **AWS Secrets Manager**. The `ExternalSecret` CR also restores `secrets` upon deletion or modification of fetched `{key, value}` pairs.
 
-# Summary
+# IV. Summary
 
 In this guide we've demonstrated how to:
 
-- Create AWS Secrets Manager Bucket
+{>>Reword this section. The high level solution is the patching of the image registry; rest of the solution comes natively from ESO<<}
+
+- Create a AWS Secrets Manager Bucket
 - Place properties in the bucket
 - Create IAM User and assign it a policy with **Read** permissions to specific buckets
 - Deploy the `external-secrets-operator` at the cluster level
@@ -384,25 +415,9 @@ In this guide we've demonstrated how to:
 - Create kubernetes secrets by merely specifying `app:bucket` relationship in a CR yaml file.
 
 # Sources
-- [External Secrets Operator Docs](https://external-secrets.io/v0.6.1/)
-- [Guide Repository](https://github.com/luqmanbarry/external-secrets-operator-guide)
+
+- [External Secrets Operator Documentation](https://external-secrets.io/v0.6.1/)
 - [IAM Policy example for AWS Secrets Manager](https://docs.aws.amazon.com/mediaconnect/latest/ug/iam-policy-examples-asm-secrets.html)
+- [Github repository for this guide](https://github.com/luqmanbarry/external-secrets-operator-guide)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+[^1]: <https://external-secrets.io/v0.7.0-rc1/introduction/stability-support/>
