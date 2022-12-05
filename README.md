@@ -400,7 +400,9 @@ Product Service's secrets `{key, value}` pairs generated:
 Shipping Service's secrets `{key, value}` pairs generated:
 ![ExternalSecrets Owned Secret](assets/eso-secrets-ready-shipping.png)
 
-As can be seen, the `secrets` have been successfully created, with content from **AWS Secrets Manager**. The `ExternalSecret` CR also restores `secrets` upon deletion or modification of fetched `{key, value}` pairs.
+As can be seen, the `secrets` have been successfully created, with content from **AWS Secrets Manager**. The `ExternalSecret` CR also restores `secrets` upon deletion or modification of fetched `{key, value}` pairs. 
+
+Once secrets are synchronized, next steps are to update CI/CD jobs to disable secrets creation and modify deployment templates to reference our new secrets.
 
 --------------------------------------------------------------------------------------
 
