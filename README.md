@@ -5,42 +5,41 @@
 
 > "The [External Secrets Operator](https://external-secrets.io/) (ESO) extends Kubernetes with `Custom Resources`, which define where secrets live and how to synchronize them. The controller fetches secrets from an external API and creates Kubernetes secrets. If the secret from the external API changes, the controller will reconcile the state in the cluster and update the secrets accordingly."
 >
-> &mdash;ESO Docs.
+> &mdash; ESO Docs.
 
 # Introduction
 
-`External Secrets Operator` provides different {==modes of operation==}{>>provide examples, or list<<}, depending on the use case.
+The External Secrets Operator (ESO) supports different modes of operations such as: [Shared ClusterSecretStore](https://external-secrets.io/v0.6.1/guides/multi-tenancy/#shared-clustersecretstore), [Managed SecretStore per Namespace](https://external-secrets.io/v0.6.1/guides/multi-tenancy/#managed-secretstore-per-namespace), [ESO as a Service](https://external-secrets.io/v0.6.1/guides/multi-tenancy/#eso-as-a-service) which is the mode of choice picked for this guide.
 
-In a _multi-tenant_ setting, the operator can be deployed cluster-wide, for example, in the `openshift-operators` namespace. This makes the Operator Life Cycle management easier in that only _one_ instance and a single version of the ESO is deployed on the cluster. Hence, the tenants can focus on providing their workload secrets specifications using the `ExternalSecret` and `SecretStore` Custom Resources (CRs) to have their secrets pulled from the secrets provider (such as the [AWS Secrets Manager][aws-secrets-manager]).
+In an ESO as a Service setting, the operator can be deployed cluster-wide, for example in the `openshift-operators` namespace. This makes the Operator Life Cycle management easier in that only _one_ instance and a single version of the ESO is deployed in the cluster; and it is made available to all namespaces. Hence, application developers can focus on providing their workload secrets specifications using the `ExternalSecret` and `SecretStore` Custom Resources (CRs) to have their secrets pulled from the secrets provider (such as the [AWS Secrets Manager][aws-secrets-manager]).
 
 
-{>>Describe what this diagram is depicting<<}
+Below diagram depicts the **ESO as a Service** setup whereby application teams manage `ExternalSecret, SecretStore` custom resources; and the platform team handles Operator installation and upgrades.
 
 ![ESO as a Service](assets/eso-as-a-service-diagram.PNG)
 
 [aws-secrets-manager]: https://aws.amazon.com/secrets-manager/
 
-## The Problem
+## Problem Statement
 
-{>>Provide a high level description of the problem you are solving here<<}
+This guide makes an attempt to show one of the many methods we can store "sensitive" data in an external secrets management system such as **AWS Secrets Manager**, retrieve that data via the ESO and have them stored in Kubernetes secrets for applications to use.
 
-## The Solution
+## Solution
 
-{>>Describe the solution approach. What does this solution do to solve the problem described above<<}
+To address this concern, we will leverage the ESO which will be deployed as a Service (diagram above) on a ROSA (OpenShift v4.10+) cluster. In other words, the operator custom resources (`ExternalSecret, SecretStore`) will be available to all existing and future namespaces for application developers to use.
 
-Three (3) helm charts are utilized to deploy this solution. Note that this is simulating an enterprise deployment environment where Corporate InfoSec policies require all container images be hosted and served from a private, _internal_ registry.
+In this guide, the `AWS Secrets Manager` is used as the secrets provider. However, with few tweaks the solution can be used with any of the providers[^1] supported by ESO.
 
-{>>Provide a description of what is the setup, and the constraint/problem that this specific deployment solution solves. E.g., the image reference patching requirement.<<}
 
-In this example, the `AWS Secrets Manager` is used as the secrets provider. However, the solution can be used with any of the providers[^1] supported by ESO.
+Three (3) helm charts are utilized to deploy this solution. Furthermore, the solution simulates an enterprise deployment environment where Corporate InfoSec policies require all container images be hosted and served from a private, _internal_ registry.
 
 The following charts are deployed in this order:
 
 - [eso-operator-install][]: Deploys the ESO operator and its CRDs (`OperatorGroup`, `Subscription`) in the `openshift-operators` namespace.
 
-- [eso-operator-patch][]: Deploys the resources needed to apply patches to the operator. This chart deploys an `OperatorConfig` resource which references a private container image; while the `CronJob` periodically `patches` the operator controller manager deployment to reference another private container image.
+- [eso-operator-patch][]: Two container images are needed for the operator complete setup. This chart Deploys the resources needed to apply patches to the operator. Moreover, the chart creates an `OperatorConfig` resource which references a private container image; while the `CronJob` periodically `patches` the operator `ClusterServiceVersion` (CSV) to reference another private container image.
 
-- [eso-secrets-sync][]: Deploys the CRs (`ExternalSecret`, `SecretStore`) needed to integrate with the secrets provider, as well as creating the Kubernetes `secrets` backed by one or more `AWS Secret Manager` buckets (for this example).
+- [eso-secrets-sync][]: Deploys the CRs (`ExternalSecret`, `SecretStore`) needed to integrate with the secrets provider, as well as creating the Kubernetes `secrets` backed by one or more `AWS Secret Manager` buckets.
 
     - `Secret`: Kubernetes object for storing the AWS IAM User credentials
     - `SecretStore`: ESO custom resource that references the `Secret`.
@@ -67,7 +66,7 @@ The following charts are deployed in this order:
 
 These Helm charts have been tested on Red Hat `OpenShift` v4.10.x.
 
-The following example uses two example services (`Product Service` and the `Shipping Service`), which will use the ESO to access credentials from AWS Secrets Manager.
+The guide uses two example micro-services (`Product Service` and the `Shipping Service`), which will use the ESO to access and fetch "sensitive" data from the AWS Secrets Manager service.
 
 Note that the following screenshots and code snippets intentionally show **sample** sensitive data as _examples_.
 
@@ -85,7 +84,7 @@ Shipping Service Empty Bucket
 ![Shipping Service Empty Bucket](assets/shipping-service-bucket-empty.png)
 
 
-{>>Insert a link to the AWS documentation for creating the buckets<<}
+Follow [this link](https://docs.aws.amazon.com/secretsmanager/latest/userguide/getting-started.html) to learn more about the **AWS Secrets Manager** service.
 
 ### 2. Place secrets data into the buckets following the `{"key": "value"}` pair format.
 
@@ -93,7 +92,7 @@ Shipping Service Empty Bucket
 
 For example to encode/decode a plaintext file, execute this command:
 
-```
+```sh
 # Encode to base64
 base64 < cleartextFile.txt > encodedFile.txt
 
@@ -135,8 +134,8 @@ IAM Policy with **Read** permission to the two (2) buckets:
       "secretsmanager:ListSecretVersionIds"
     ],
     "Resource": [
-      "arn:aws:secretsmanager:us-east-1:804277090895:secret:non-prod/eso-demo/product-service/secrets-1R6JAf",
-      "arn:aws:secretsmanager:us-east-1:804277090895:secret:non-prod/eso-demo/shipping-service/secrets-apkTYz"
+      "arn:aws:secretsmanager:us-east-1:804277090123:secret:non-prod/eso-demo/product-service/secrets-1R6JAf",
+      "arn:aws:secretsmanager:us-east-1:804277090123:secret:non-prod/eso-demo/shipping-service/secrets-apkTYz"
     ]
   },
     {
@@ -171,9 +170,9 @@ Take note of the **Access key ID** and **Secret access key** info.
 
 We now proceed with installing the operator and its custom resources.
 
-The setup simulates an environment where enterprise INFOSEC policy allows container images only from the corporate private registry or OpenShift's internal registry.
+The setup simulates an environment where enterprise InfoSec policy allows container images only from the corporate private registry or OpenShift's internal registry.
 
-The [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch) chart is created to address this requirement. The chart deploys a `CronJob` resource, which periodically replaces the default Github container registry (`ghcr.io`) image referfence defined in the `ClusterServiceVersion` by a **private** image pushed via `skopeo` into the OpenShift cluster `eso-build` namespace.
+The [eso-operator-patch](https://github.com/luqmanbarry/external-secrets-operator-guide/tree/master/eso-operator-patch) chart is created to address this requirement. The chart deploys a `CronJob` resource, which periodically replaces the default Github container registry (`ghcr.io`) image reference defined in the `ClusterServiceVersion` (CSV) by a **private** image pushed via `skopeo` into the OpenShift cluster `eso-build` namespace.
 
 Clone the [guide repository](https://github.com/luqmanbarry/external-secrets-operator-guide) and use the repo folder as default directory.
 
@@ -205,30 +204,32 @@ OperatorConfig Image:
 Before images were copied to internal registry **eso-build** namespace:
 ![eso-build Empty](assets/eso-build-empty.png)
 
-Get public route of OpenShift internal registry
+Get public route of OpenShift internal registry. Follow [this link](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html-single/registry/index) to learn more about internal registry for OpenShift.
 
 ```sh
-oc get route default-route -ojsonpath='{.spec.host}' -n openshift-image-registry
+# Expose registry via a Route if not available
+oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
 
-# OUTPUT
-default-route-openshift-image-registry.apps.cluster-lmttg.lmttg.sandbox2014.opentlc.com
+# Get the hostname of the registry route
+REGISTRY_HOST=$(oc get route default-route -ojsonpath='{.spec.host}' -n openshift-image-registry)
+
+echo ${REGISTRY_HOST}
 ```
 
-{>>Mask the TLD domain in the sample output above<<}
 
 Run `skopeo` commands to copy images from github container registry (ghcr.io) to internal registry.
 
 ```sh
 # Controller Manager Image
 skopeo copy docker://ghcr.io/external-secrets/external-secrets-helm-operator:v0.6.1 \
-    docker://default-route-openshift-image-registry.apps.cluster-lmttg.lmttg.sandbox2014.opentlc.com/eso-build/external-secrets-helm-operator:v0.6.1 \
+    docker://${REGISTRY_HOST}/eso-build/external-secrets-helm-operator:v0.6.1 \
     --dest-username $(oc whoami) \
     --dest-password $(oc whoami -t) \
     --override-os linux
 
 # OperatorConfig Image
 skopeo copy docker://ghcr.io/external-secrets/external-secrets:v0.6.1 \
-    docker://default-route-openshift-image-registry.apps.cluster-lmttg.lmttg.sandbox2014.opentlc.com/eso-build/external-secrets:v0.6.1 \
+    docker://${REGISTRY_HOST}/eso-build/external-secrets:v0.6.1 \
     --dest-username $(oc whoami) \
     --dest-password $(oc whoami -t) \
     --override-os linux
@@ -338,8 +339,8 @@ For example:
 provider:
   aws:
     region: us-east-1
-    accessKey: "AKIA3WQVGPJHS4IJQG64"
-    secretAccessKey: "EZUQOTIvg03PS7y2YboBl+uWmemET804qy2Qowlt"
+    accessKey: "<YOUR_ACCESS_KEY_HERE>"
+    secretAccessKey: "<YOUR_SECRET_ACCESS_KEY_HERE>"
     authSecretName: eso-aws-authn-secret
     externalSecrets:
       apps:
@@ -401,23 +402,19 @@ Shipping Service's secrets `{key, value}` pairs generated:
 
 As can be seen, the `secrets` have been successfully created, with content from **AWS Secrets Manager**. The `ExternalSecret` CR also restores `secrets` upon deletion or modification of fetched `{key, value}` pairs.
 
+--------------------------------------------------------------------------------------
+
 # IV. Summary
 
-In this guide we've demonstrated how to:
+In this guide we've demonstrated how to setup **ESO as a service** on OpenShift with images served from the internal registry. Additionally, we've demonstrated some basic to advanced concepts of Kubernetes package management using Helm, skopeo, oc/kubectl.
 
-{>>Reword this section. The high level solution is the patching of the image registry; rest of the solution comes natively from ESO<<}
-
-- Create a AWS Secrets Manager Bucket
-- Place properties in the bucket
-- Create IAM User and assign it a policy with **Read** permissions to specific buckets
-- Deploy the `external-secrets-operator` at the cluster level
-- Deploy resources with goal injecting customizations (reference private/internal registry) into the Operator created objects. Note, there are other ways to achieve the same goals.
-- Create kubernetes secrets by merely specifying `app:bucket` relationship in a CR yaml file.
 
 # Sources
 
 - [External Secrets Operator Documentation](https://external-secrets.io/v0.6.1/)
 - [IAM Policy example for AWS Secrets Manager](https://docs.aws.amazon.com/mediaconnect/latest/ug/iam-policy-examples-asm-secrets.html)
-- [Github repository for this guide](https://github.com/luqmanbarry/external-secrets-operator-guide)
+- [Guide Github Repository](https://github.com/luqmanbarry/external-secrets-operator-guide)
+- [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/getting-started.html)
+- [OpenShift Registry](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10/html-single/registry/index#doc-wrapper)
 
 [^1]: <https://external-secrets.io/v0.7.0-rc1/introduction/stability-support/>
