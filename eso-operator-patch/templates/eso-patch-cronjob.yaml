@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "eso-operator-patch.name" . }}
+  namespace: {{ include "eso-operator-patch.namespace" . }}
+  labels:
+    {{- include "eso-operator-patch.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.operator.imagePatchCronJob.patchSchedule }}"
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  concurrencyPolicy: 'Replace'
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "eso-operator-patch.labels" . | nindent 12 }}
+        spec:
+          serviceAccountName: "{{ .Values.operator.imagePatchCronJob.serviceAccountName }}"
+          serviceAccount: "{{ .Values.operator.imagePatchCronJob.serviceAccountName }}"
+          restartPolicy: Never
+          containers:
+          - name: {{ include "eso-operator-patch.name" . }}
+            image: registry.redhat.io/openshift4/ose-cli:v4.10
+            command:
+            - /bin/sh
+            - -c
+            - |
+                set -e
+                SOURCE_IMAGE=$(oc get deploy/{{ .Values.operator.controllerManager.deploymentName }} \
+                  -o jsonpath='{.spec.template.spec.containers[0].image}')
+                TARGET_IMAGE="{{ .Values.operator.controllerManager.image.repository }}:{{ .Values.operator.controllerManager.image.tag }}"
+
+                echo "Live Image: ${SOURCE_IMAGE}"
+                echo "Target Image: ${TARGET_IMAGE}"
+                if [[ "${SOURCE_IMAGE}" == "${TARGET_IMAGE}" ]];
+                then
+                  echo "Controller Manager Deployment have correct Image. No Image updates needed..."
+                else
+                  echo "===> Patching Image url..."
+
+                  CSV_NAME=$( oc get csv -oname --sort-by='{.metadata.creationTimestamp}' | grep {{ .Values.operator.name }} | tail -n1 | awk '{print $1}' )
+                  oc patch $CSV_NAME \
+                    --type='json' \
+                    -p="[{\"op\": \"replace\", \"path\": \"/spec/install/spec/deployments/0/spec/template/spec/containers/0/image\", \"value\":\"${TARGET_IMAGE}\"}]" \
+                    --record=true \
+                    -v=4
+
+                  echo "Waiting for child resources to be updated..."
+                  sleep 60
+
+                  echo "===> Rolling out deployment..."
+                  oc rollout restart deployment/{{ .Values.operator.controllerManager.deploymentName }}
+                fi
+                set +e
+---

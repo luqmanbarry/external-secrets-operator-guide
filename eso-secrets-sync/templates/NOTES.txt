@@ -1,0 +1,7 @@
+The following resources will be deployed:
+
+    Secret: Holds AWS ACCESS_KEY and SECRET_ACCESS_KEY details
+
+    SecretStore: Contains references to secrets which hold credentials to access the external API. It knows how to access the data stored in the cloud.
+
+    ExternalSecret: Blueprint to create secrets.
