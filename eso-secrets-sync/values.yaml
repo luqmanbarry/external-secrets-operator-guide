@@ -6,8 +6,8 @@ provider:
   aws:
     # The region of the Secrets Manager bucket
     region: us-east-1
-    accessKey: "<YOUR_ACCESS_KEY_HERE>"
-    secretAccessKey: "<YOUR_SECRET_ACCESS_KEY_HERE>"
+    accessKey: "<YOUR_AWS_ACCESS_KEY_HERE>"
+    secretAccessKey: "<YOUR_AWS_SECRET_ACCESS_KEY_HERE>"
     authSecretName: eso-aws-authn-secret 
     externalSecrets:
       apps:
