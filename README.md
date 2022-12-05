@@ -408,7 +408,7 @@ Once secrets are synchronized, next steps are to update CI/CD jobs to disable se
 
 # IV. Summary
 
-In this guide we've demonstrated how to setup **ESO as a service** on OpenShift with images served from the internal registry. Additionally, we've demonstrated some basic to advanced concepts of Kubernetes package management using Helm, skopeo, oc/kubectl.
+In this guide we've demonstrated how to setup **ESO as a service** on OpenShift with images served from the internal registry. Additionally, we've demonstrated some basic to advanced concepts of Kubernetes package management using Helm, skopeo, oc/kubectl. Furthermore, through the `eso-operator-patch` chart, we've shown one method of modifying an operator `CSV` to get its managed pods to pull from a private/internal container image registry. 
 
 
 # Sources
