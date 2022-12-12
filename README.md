@@ -6,7 +6,6 @@
 > "The [External Secrets Operator](https://external-secrets.io/) (ESO) extends Kubernetes with `Custom Resources`, which define where secrets live and how to synchronize them. The controller fetches secrets from an external API and creates Kubernetes secrets. If the secret from the external API changes, the controller will reconcile the state in the cluster and update the secrets accordingly."
 >
 > &mdash; ESO Docs.
-
 # Introduction
 
 The External Secrets Operator (ESO) supports different modes of operations such as: [Shared ClusterSecretStore](https://external-secrets.io/v0.6.1/guides/multi-tenancy/#shared-clustersecretstore), [Managed SecretStore per Namespace](https://external-secrets.io/v0.6.1/guides/multi-tenancy/#managed-secretstore-per-namespace), [ESO as a Service](https://external-secrets.io/v0.6.1/guides/multi-tenancy/#eso-as-a-service) which is the mode of choice picked for this guide.
@@ -22,7 +21,7 @@ Below diagram depicts the **ESO as a Service** setup whereby application teams m
 
 ## Problem Statement
 
-This guide makes an attempt to show one of the many methods we can store "sensitive" data in an external secrets management system such as **AWS Secrets Manager**, retrieve that data via the ESO and have them stored in Kubernetes secrets for applications to use.
+This guide makes an attempt to show one of the many methods we can utilize to store "sensitive" data in an external secrets management system such as **AWS Secrets Manager**, retrieve that data via the ESO and have them stored in Kubernetes secrets for applications to use.
 
 ## Solution
 
@@ -68,7 +67,7 @@ These Helm charts have been tested on Red Hat `OpenShift` v4.10.x.
 
 The guide uses two example micro-services (`Product Service` and the `Shipping Service`), which will use the ESO to access and fetch "sensitive" data from the AWS Secrets Manager service.
 
-Note that the following screenshots and code snippets intentionally show **sample** sensitive data as _examples_.
+Note that the following screenshots and code snippets intentionally show **sample** sensitive data as _examples_. The AWS account and ROSA cluster used for this demo will be decommissioned by the time this content goes live.
 
 # Procedure
 
@@ -88,7 +87,7 @@ Follow [this link](https://docs.aws.amazon.com/secretsmanager/latest/userguide/g
 
 ### 2. Place secrets data into the buckets following the `{"key": "value"}` pair format.
 
-> **IMPORTANT**: For multi-line strings such as certificates, properties and config files, ensure secrets values are `Base64` encoded to retain formatting. AWS Secrets Manager does not support space and newline based formatting.
+> **IMPORTANT**: For multi-line strings such as certificates, application properties and config files, ensure secrets values are `Base64` encoded to retain formatting. AWS Secrets Manager does not support space and newline based formatting.
 
 For example to encode/decode a plaintext file, execute this command:
 
