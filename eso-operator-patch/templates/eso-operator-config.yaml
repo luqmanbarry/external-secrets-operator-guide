@@ -22,8 +22,8 @@ spec:
         {{- include "eso-operator-patch.labels" . | nindent 8 }}
   concurrent: 1
   crds:
-    # createClusterExternalSecret: true
-    # createClusterSecretStore: true
+    createClusterExternalSecret: false
+    createClusterSecretStore: false
   createOperator: true
   image:
     pullPolicy: {{ .Values.operator.operatorConfig.image.pullPolicy }}
