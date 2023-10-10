@@ -14,10 +14,10 @@ operator:
       # The new PRIVATE image repository -- Make sure you replace 'eso-build' with your namespace
       repository: "image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets"
       pullPolicy: IfNotPresent
-      tag: 'v0.6.1'
+      tag: 'v0.9.5'
 
   controllerManager:
-    startingCSV: external-secrets-operator.v0.6.1
+    startingCSV: external-secrets-operator.v0.9.5
     deploymentName: "external-secrets-operator-controller-manager"
     image:
       # The original PUBLIC image repository
@@ -25,4 +25,4 @@ operator:
       # The new PRIVATE image repository -- Make sure you replace 'eso-build' by your namespace
       repository: "image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets-helm-operator"
       pullPolicy: IfNotPresent
-      tag: 'v0.6.1'
+      tag: 'v0.9.5'
