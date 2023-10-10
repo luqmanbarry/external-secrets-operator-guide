@@ -4,17 +4,17 @@ operator:
   globalOperatorGroupExists: true
   # Possible Values: Manual, Automatic
   installPlanApproval: Automatic
-  startingCSV: external-secrets-operator.v0.6.1
+  startingCSV: external-secrets-operator.v0.9.5
   name: external-secrets-operator
 
   operatorConfig:
     image: 
       repository: ghcr.io/external-secrets/external-secrets
       pullPolicy: IfNotPresent
-      tag: 'v0.6.1'
+      tag: 'v0.9.5'
 
   controllerManager:
     image: 
       repository: ghcr.io/external-secrets/external-secrets-helm-operator
       pullPolicy: IfNotPresent
-      tag: 'v0.6.1'
+      tag: 'v0.9.5'
