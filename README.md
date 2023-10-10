@@ -201,13 +201,13 @@ Registry format: `<INTERNAL_REGISTRY_SVC>:<PORT>/<IMAGE_NAMESPACE>/<IMAGE_STREAM
 
 Operator Controller Manager Image:
 
-- Public Image: `ghcr.io/external-secrets/external-secrets-helm-operator:v0.6.1`
-- Internal Image: `image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets-helm-operator:v0.6.1`
+- Public Image: `ghcr.io/external-secrets/external-secrets-helm-operator:v0.9.5`
+- Internal Image: `image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets-helm-operator:v0.9.5`
 
 OperatorConfig Image:
 
-- Public Image: `ghcr.io/external-secrets/external-secrets:v0.6.1`
-- Internal Image: `image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets:v0.6.1`
+- Public Image: `ghcr.io/external-secrets/external-secrets:v0.9.5`
+- Internal Image: `image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets:v0.9.5`
 
 
 Before images were copied to internal registry **eso-build** namespace:
@@ -232,15 +232,15 @@ Run `skopeo` commands to copy images from github container registry (ghcr.io) to
 
 ```sh
 # Controller Manager Image
-skopeo copy docker://ghcr.io/external-secrets/external-secrets-helm-operator:v0.6.1 \
-    docker://${REGISTRY_HOST}/eso-build/external-secrets-helm-operator:v0.6.1 \
+skopeo copy docker://ghcr.io/external-secrets/external-secrets-helm-operator:v0.9.5 \
+    docker://${REGISTRY_HOST}/eso-build/external-secrets-helm-operator:v0.9.5 \
     --dest-username $(oc whoami) \
     --dest-password $(oc whoami -t) \
     --override-os linux
 
 # OperatorConfig Image
-skopeo copy docker://ghcr.io/external-secrets/external-secrets:v0.6.1 \
-    docker://${REGISTRY_HOST}/eso-build/external-secrets:v0.6.1 \
+skopeo copy docker://ghcr.io/external-secrets/external-secrets:v0.9.5 \
+    docker://${REGISTRY_HOST}/eso-build/external-secrets:v0.9.5 \
     --dest-username $(oc whoami) \
     --dest-password $(oc whoami -t) \
     --override-os linux
@@ -304,10 +304,10 @@ operator:
       # The new PRIVATE image repository -- Make sure you replace 'eso-build' with your namespace
       repository: "image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets"
       pullPolicy: IfNotPresent
-      tag: 'v0.6.1'
+      tag: 'v0.9.5'
 
   controllerManager:
-    startingCSV: external-secrets-operator.v0.6.1
+    startingCSV: external-secrets-operator.v0.9.5
     deploymentName: "external-secrets-operator-controller-manager"
     image:
       # The original PUBLIC image repository
@@ -315,7 +315,7 @@ operator:
       # The new PRIVATE image repository -- Make sure you replace 'eso-build' by your namespace
       repository: "image-registry.openshift-image-registry.svc:5000/eso-build/external-secrets-helm-operator"
       pullPolicy: IfNotPresent
-      tag: 'v0.6.1'
+      tag: 'v0.9.5'
 ```
 
 
@@ -332,7 +332,7 @@ After Installation:
 ![OperatorConfig Installed](assets/operator-config-installed.png)
 
 
-The Customer Resources created as a result:
+The Custom Resources created as a result:
 ![OperatorConfig Resources](assets/operator-config-resources.png)
 
 
@@ -440,7 +440,7 @@ In this guide we've demonstrated how to setup **ESO as a service** on OpenShift 
 
 # Sources
 
-- [External Secrets Operator Documentation](https://external-secrets.io/v0.6.1/)
+- [External Secrets Operator Documentation](https://external-secrets.io/v0.9.5/)
 - [IAM Policy example for AWS Secrets Manager](https://docs.aws.amazon.com/mediaconnect/latest/ug/iam-policy-examples-asm-secrets.html)
 - [Guide Github Repository](https://github.com/luqmanbarry/external-secrets-operator-guide)
 - [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/getting-started.html)
